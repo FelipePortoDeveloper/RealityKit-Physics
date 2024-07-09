@@ -58,20 +58,32 @@ struct ARViewContainer: UIViewRepresentable {
     
         let material = SimpleMaterial(color: .purple, isMetallic: true)
         
+        let materialGround = SimpleMaterial(color: .gray, isMetallic: false)
+        
         // Criando um mesh
         
         let mesh = MeshResource.generateBox(size: 0.2, cornerRadius: 0.005)
+        
+        let meshGround = MeshResource.generatePlane(width: 0.4, depth: 0.4)
+        
         
         // Criando uma entidade
         
         let box = ModelEntity(mesh: mesh, materials: [material])
         
-            // Adicionando colisões / fisica na caixa
+        let ground = ModelEntity(mesh: meshGround, materials: [materialGround])
+        
+            // Adicionando colisões / fisica
+        
+        ground.generateCollisionShapes(recursive: true)
+        
+        ground.physicsBody = PhysicsBodyComponent(massProperties: .default, material: .default, mode: .static)
         
         box.generateCollisionShapes(recursive: true)
         
         // Criando uma ancora
         
+        let anchorGround = AnchorEntity(plane: .horizontal, classification: .floor)
         let anchor = AnchorEntity(plane: .horizontal)
         
             // Mudando a posição da caixa no eixo y
@@ -80,6 +92,7 @@ struct ARViewContainer: UIViewRepresentable {
         
         // Adicionando a caixa na ancora
         
+        anchorGround.addChild(ground)
         anchor.addChild(box)
         
         // Adicionando as configurações da view
@@ -89,6 +102,7 @@ struct ARViewContainer: UIViewRepresentable {
         
         // Adicionando a ancora na cena
         
+        arView.scene.anchors.append(anchorGround)
         arView.scene.anchors.append(anchor)
 
         return arView
